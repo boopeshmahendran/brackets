@@ -368,6 +368,10 @@ define(function (require, exports, module) {
         _saveTreeState();
     };
 
+    ActionCreator.prototype.moveFile = function(oldPath, newPath) {
+      this.model.moveFile(oldPath, newPath);
+    };
+
     /**
      * See `ProjectModel.refresh`
      */

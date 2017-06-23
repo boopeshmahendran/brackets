@@ -196,6 +196,25 @@ define(function (require, exports, module) {
         }
     };
 
+    var dragAndDrop = {
+      drag: function(e) {
+        e.dataTransfer.setData("text", JSON.stringify({
+          fileName: this.props.name,
+          path: this.myPath()
+        }));
+        e.stopPropagation();
+      },
+      drop: function(e) {
+        var data = JSON.parse(e.dataTransfer.getData("text"));
+        this.props.actions.moveFile(data.path, this.myPath());
+        e.stopPropagation();
+      },
+
+      allowDrop: function(e) {
+        e.preventDefault();
+      }
+    };
+
     /**
      * @private
      *
@@ -254,6 +273,7 @@ define(function (require, exports, module) {
          * Send matching mouseDown events to the action creator as a setContext action.
          */
         handleMouseDown: function (e) {
+          return;
             e.stopPropagation();
             if (e.button === RIGHT_MOUSE_BUTTON ||
                     (this.props.platform === "mac" && e.button === LEFT_MOUSE_BUTTON && e.ctrlKey)) {
@@ -363,7 +383,7 @@ define(function (require, exports, module) {
      * * forceRender: causes the component to run render
      */
     var fileNode = React.createFactory(React.createClass({
-        mixins: [contextSettable, pathComputer, extendable],
+        mixins: [contextSettable, pathComputer, extendable, dragAndDrop],
 
         /**
          * Ensures that we always have a state object.
@@ -497,9 +517,11 @@ define(function (require, exports, module) {
             var liArgs = [
                 {
                     className: this.getClasses("jstree-leaf"),
-                    onClick: this.handleClick,
-                    onMouseDown: this.handleMouseDown,
-                    onDoubleClick: this.handleDoubleClick
+                    //onClick: this.handleClick,
+                    //onMouseDown: this.handleMouseDown,
+                    onDoubleClick: this.handleDoubleClick,
+                    draggable: true,
+                    onDragStart: this.drag
                 },
                 DOM.ins({
                     className: "jstree-icon"
@@ -639,7 +661,7 @@ define(function (require, exports, module) {
      * * forceRender: causes the component to run render
      */
     directoryNode = React.createFactory(React.createClass({
-        mixins: [contextSettable, pathComputer, extendable],
+        mixins: [contextSettable, pathComputer, extendable, dragAndDrop],
 
         /**
          * We need to update this component if the sort order changes or our entry object
@@ -741,8 +763,12 @@ define(function (require, exports, module) {
             var liArgs = [
                 {
                     className: this.getClasses("jstree-" + nodeClass),
-                    onClick: this.handleClick,
-                    onMouseDown: this.handleMouseDown
+                    //onClick: this.handleClick,
+                    //onMouseDown: this.handleMouseDown,
+                    draggable: true,
+                    onDragStart: this.drag,
+                    onDrop: this.drop,
+                    onDragOver: this.allowDrop
                 },
                 _createAlignedIns(this.props.depth)
             ];

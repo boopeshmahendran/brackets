@@ -1239,6 +1239,15 @@ define(function (require, exports, module) {
         this._viewModel.closeSubtree(this.makeProjectRelativeIfPossible(path));
     };
 
+    ProjectModel.prototype.moveFile = function(oldPath, newPath) {
+      var fileName = FileUtils.getBaseName(oldPath);
+      newPath += fileName;
+      var self = this;
+      this._renameItem(oldPath, newPath, fileName).then(function () {
+        self._viewModel.moveFile(self.makeProjectRelativeIfPossible(oldPath), self.makeProjectRelativeIfPossible(newPath));
+      });
+    };
+
     /**
      * Toggle the open state of subdirectories.
      * @param {!string}  path        parent directory
