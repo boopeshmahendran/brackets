@@ -507,8 +507,13 @@ define(function (require, exports, module) {
       if (treeData.getIn(objectPath2).get("open")) {
         objectPath2.push("children");
         objectPath2.push(originalName);
-        treeData = _setIn(treeData, objectPath2, Immutable.Map());
+        if (_.last(oldPath) !== "/") // check if file
+          treeData = _setIn(treeData, objectPath2, Immutable.Map());
+        else
+          treeData = _setIn(treeData, objectPath2, Immutable.Map({children: null}));
       }
+
+      console.log(JSON.stringify(treeData, null, 2));
 
       this._commit(treeData);
     };

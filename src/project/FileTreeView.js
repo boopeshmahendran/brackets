@@ -199,19 +199,26 @@ define(function (require, exports, module) {
     var dragAndDrop = {
       drag: function(e) {
         e.dataTransfer.setData("text", JSON.stringify({
-          fileName: this.props.name,
           path: this.myPath()
         }));
+        this.props.actions.setContext(null);
         e.stopPropagation();
       },
       drop: function(e) {
         var data = JSON.parse(e.dataTransfer.getData("text"));
-        this.props.actions.moveFile(data.path, this.myPath());
+        var fileName = FileUtils.getBaseName(data.path);
+        this.props.actions.moveFile(data.path, this.myPath() + fileName);
         e.stopPropagation();
       },
 
       allowDrop: function(e) {
+        e.target.style.color = "red";
+        console.log(e.target.style.borderColor);
         e.preventDefault();
+      },
+
+      dragLeave: function(e) {
+        e.target.style.color  = "white";
       }
     };
 
@@ -273,7 +280,6 @@ define(function (require, exports, module) {
          * Send matching mouseDown events to the action creator as a setContext action.
          */
         handleMouseDown: function (e) {
-          return;
             e.stopPropagation();
             if (e.button === RIGHT_MOUSE_BUTTON ||
                     (this.props.platform === "mac" && e.button === LEFT_MOUSE_BUTTON && e.ctrlKey)) {
@@ -285,7 +291,7 @@ define(function (require, exports, module) {
             if (this.props.entry.get("rename")) {
                 return;
             }
-            e.preventDefault();
+            //e.preventDefault();
         }
     };
 
@@ -517,8 +523,8 @@ define(function (require, exports, module) {
             var liArgs = [
                 {
                     className: this.getClasses("jstree-leaf"),
-                    //onClick: this.handleClick,
-                    //onMouseDown: this.handleMouseDown,
+                    onClick: this.handleClick,
+                    onMouseDown: this.handleMouseDown,
                     onDoubleClick: this.handleDoubleClick,
                     draggable: true,
                     onDragStart: this.drag
@@ -763,12 +769,13 @@ define(function (require, exports, module) {
             var liArgs = [
                 {
                     className: this.getClasses("jstree-" + nodeClass),
-                    //onClick: this.handleClick,
-                    //onMouseDown: this.handleMouseDown,
+                    onClick: this.handleClick,
+                    onMouseDown: this.handleMouseDown,
                     draggable: true,
                     onDragStart: this.drag,
                     onDrop: this.drop,
-                    onDragOver: this.allowDrop
+                    onDragOver: this.allowDrop,
+                    onDragLeave: this.dragLeave
                 },
                 _createAlignedIns(this.props.depth)
             ];

@@ -116,7 +116,8 @@ define(function (require, exports, module) {
         ERR_TYPE_LOADING_PROJECT_NATIVE = 6,
         ERR_TYPE_MAX_FILES              = 7,
         ERR_TYPE_OPEN_DIALOG            = 8,
-        ERR_TYPE_INVALID_FILENAME       = 9;
+        ERR_TYPE_INVALID_FILENAME       = 9,
+        ERR_TYPE_MOVE_EXISTS            = 10;
 
     /**
      * @private
@@ -369,7 +370,20 @@ define(function (require, exports, module) {
     };
 
     ActionCreator.prototype.moveFile = function(oldPath, newPath) {
-      this.model.moveFile(oldPath, newPath);
+      this.model.moveFile(oldPath, newPath)
+      .done(function() {
+
+      }).fail(function(errorInfo) {
+        window.setTimeout(function () {
+          switch (errorInfo.type) {
+            //case FileSystemError.ALREADY_EXISTS:
+            default:
+            _showErrorDialog(ERR_TYPE_MOVE_EXISTS, errorInfo.isFolder, Strings.FILE_EXISTS_ERR, errorInfo.fullPath);
+            break;
+          }
+        }, 10);
+      });
+
     };
 
     /**
@@ -598,6 +612,10 @@ define(function (require, exports, module) {
         case ERR_TYPE_INVALID_FILENAME:
             title = StringUtils.format(Strings.INVALID_FILENAME_TITLE, isFolder ? Strings.DIRECTORY_NAME : Strings.FILENAME);
             message = StringUtils.format(Strings.INVALID_FILENAME_MESSAGE, isFolder ? Strings.DIRECTORY_NAMES_LEDE : Strings.FILENAMES_LEDE, error);
+            break;
+        case ERR_TYPE_MOVE_EXISTS:
+            title = StringUtils.format(Strings.INVALID_FILENAME_TITLE, titleType);
+            message = StringUtils.format(Strings.ENTRY_WITH_SAME_NAME_EXISTS, path);
             break;
         }
 
