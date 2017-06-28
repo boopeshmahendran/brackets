@@ -1239,32 +1239,31 @@ define(function (require, exports, module) {
         this._viewModel.closeSubtree(this.makeProjectRelativeIfPossible(path));
     };
 
-    ProjectModel.prototype.moveFile = function(oldPath, newPath) {
-      var d = new $.Deferred();
+    ProjectModel.prototype.moveItem = function(oldPath, newPath) {
+        var d = new $.Deferred();
 
+        //  delete this._selections.rename;
+        //  delete this._selections.context;
+        //
+        //  this._viewModel.moveMarker("rename", oldPath, null);
+        //  this._viewModel.moveMarker("context", oldPath, null);
+        //  this._viewModel.moveMarker("creating", oldPath, null);
 
-    //  delete this._selections.rename;
-    //  delete this._selections.context;
-//
-    //  this._viewModel.moveMarker("rename", oldPath, null);
-    //  this._viewModel.moveMarker("context", oldPath, null);
-    //  this._viewModel.moveMarker("creating", oldPath, null);
+        var self = this;
+        var fileName = FileUtils.getBaseName(newPath);
+        this._renameItem(oldPath, newPath, fileName).then(function () {
+            self._viewModel.moveItem(self.makeProjectRelativeIfPossible(oldPath), self.makeProjectRelativeIfPossible(newPath));
+            d.resolve();
+        }).fail(function (errorType) {
+            var errorInfo = {
+                type: errorType,
+                isFolder: !_pathIsFile(newPath),
+                fullPath: newPath
+            };
+            d.reject(errorInfo);
+        });
 
-      var self = this;
-      var fileName = FileUtils.getBaseName(newPath);
-      this._renameItem(oldPath, newPath, fileName).then(function () {
-        self._viewModel.moveFile(self.makeProjectRelativeIfPossible(oldPath), self.makeProjectRelativeIfPossible(newPath));
-        d.resolve();
-      }).fail(function (errorType) {
-        var errorInfo = {
-          type: errorType,
-          isFolder: !_pathIsFile(newPath),
-          fullPath: newPath
-        };
-        d.reject(errorInfo);
-      });
-
-      return d.promise();
+        return d.promise();
     };
 
     /**

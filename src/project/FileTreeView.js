@@ -35,6 +35,7 @@ define(function (require, exports, module) {
         ReactDOM          = require("thirdparty/react-dom"),
         Classnames        = require("thirdparty/classnames"),
         Immutable         = require("thirdparty/immutable"),
+        Menus               = require("command/Menus"),
         _                 = require("thirdparty/lodash"),
         FileUtils         = require("file/FileUtils"),
         LanguageManager   = require("language/LanguageManager"),
@@ -160,6 +161,10 @@ define(function (require, exports, module) {
             }
         },
 
+        handleMouseDown: function(e) {
+            e.preventDefault();
+        },
+
         /**
          * If the user presses enter or escape, we either successfully complete or cancel, respectively,
          * the rename or create operation that is underway.
@@ -196,31 +201,37 @@ define(function (require, exports, module) {
         }
     };
 
-    var dragAndDrop = {
-      drag: function(e) {
-        e.dataTransfer.setData("text", JSON.stringify({
-          path: this.myPath()
-        }));
-        this.props.actions.setContext(null);
-        e.stopPropagation();
-      },
-      drop: function(e) {
-        var data = JSON.parse(e.dataTransfer.getData("text"));
-        var fileName = FileUtils.getBaseName(data.path);
-        this.props.actions.moveFile(data.path, this.myPath() + fileName);
-        e.stopPropagation();
-      },
+    /**
+     * This is a mixin that provides drag and drop move function.
+     */
+     var dragAndDrop = {
+         drag: function(e) {
+             e.dataTransfer.setData("text", JSON.stringify({
+                 path: this.myPath()
+             }));
 
-      allowDrop: function(e) {
-        e.target.style.color = "red";
-        console.log(e.target.style.borderColor);
-        e.preventDefault();
-      },
+            // Close open menus on drag and clear the context, but only if there's a menu open.
+            if ($(".dropdown.open").length > 0) {
+                Menus.closeAll();
+                this.props.actions.setContext(null);
+            }
 
-      dragLeave: function(e) {
-        e.target.style.color  = "white";
-      }
-    };
+             e.stopPropagation();
+         },
+         drop: function(e) {
+             var data = JSON.parse(e.dataTransfer.getData("text"));
+             var fileName = FileUtils.getBaseName(data.path);
+             this.props.actions.moveItem(data.path, this.myPath() + fileName);
+             e.stopPropagation();
+         },
+
+         allowDrop: function(e) {
+             e.preventDefault();
+         },
+
+         dragLeave: function(e) {
+         }
+     };
 
     /**
      * @private
@@ -259,6 +270,7 @@ define(function (require, exports, module) {
                 onKeyDown: this.handleKeyDown,
                 onInput: this.handleInput,
                 onClick: this.handleClick,
+                onMouseDown: this.handleMouseDown,
                 onBlur: this.handleBlur,
                 style: {
                     width: width
@@ -289,9 +301,10 @@ define(function (require, exports, module) {
             }
             // Return true only for mouse down in rename mode.
             if (this.props.entry.get("rename")) {
+                e.preventDefault(); // Disable drag and drop when renaming
                 return;
             }
-            //e.preventDefault();
+            // e.preventDefault();
         }
     };
 
@@ -772,10 +785,7 @@ define(function (require, exports, module) {
                     onClick: this.handleClick,
                     onMouseDown: this.handleMouseDown,
                     draggable: true,
-                    onDragStart: this.drag,
-                    onDrop: this.drop,
-                    onDragOver: this.allowDrop,
-                    onDragLeave: this.dragLeave
+                    onDragStart: this.drag
                 },
                 _createAlignedIns(this.props.depth)
             ];
@@ -794,7 +804,10 @@ define(function (require, exports, module) {
                 // Need to flatten the arguments because getIcons returns an array
                 var aArgs = _.flatten([{
                     href: "#",
-                    className: directoryClasses
+                    className: directoryClasses,
+                    onDrop: this.drop,
+                    onDragOver: this.allowDrop,
+                    onDragLeave: this.dragLeave
                 }, thickness, this.getIcons(), this.props.name]);
                 nameDisplay = DOM.a.apply(DOM.a, aArgs);
             }

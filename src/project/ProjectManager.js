@@ -369,21 +369,20 @@ define(function (require, exports, module) {
         _saveTreeState();
     };
 
-    ActionCreator.prototype.moveFile = function(oldPath, newPath) {
-      this.model.moveFile(oldPath, newPath)
-      .done(function() {
+    ActionCreator.prototype.moveItem = function(oldPath, newPath) {
+        this.model.moveItem(oldPath, newPath)
+        .done(function() {
 
-      }).fail(function(errorInfo) {
-        window.setTimeout(function () {
-          switch (errorInfo.type) {
-            //case FileSystemError.ALREADY_EXISTS:
-            default:
-            _showErrorDialog(ERR_TYPE_MOVE_EXISTS, errorInfo.isFolder, Strings.FILE_EXISTS_ERR, errorInfo.fullPath);
-            break;
-          }
-        }, 10);
-      });
-
+        }).fail(function(errorInfo) {
+            window.setTimeout(function () {
+                switch (errorInfo.type) {
+                    //case FileSystemError.ALREADY_EXISTS:
+                    default:
+                    _showErrorDialog(ERR_TYPE_MOVE_EXISTS, errorInfo.isFolder, Strings.FILE_EXISTS_ERR, errorInfo.fullPath);
+                    break;
+                }
+            }, 10);
+        });
     };
 
     /**
@@ -1231,6 +1230,16 @@ define(function (require, exports, module) {
 
         $projectTreeContainer.on("scroll", function () {
             // Close open menus on scroll and clear the context, but only if there's a menu open.
+            if ($(".dropdown.open").length > 0) {
+                Menus.closeAll();
+                actionCreator.setContext(null);
+            }
+            // we need to render the tree without a delay to not cause selection extension issues (#10573)
+            _renderTreeSync();
+        });
+
+        $(".jstree-leaf").on("dragstart", function () {
+            // Close open menus on dragStart and clear the context, but only if there's a menu open.
             if ($(".dropdown.open").length > 0) {
                 Menus.closeAll();
                 actionCreator.setContext(null);

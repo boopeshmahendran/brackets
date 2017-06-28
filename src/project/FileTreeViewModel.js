@@ -489,33 +489,33 @@ define(function (require, exports, module) {
         this._commit(treeData);
     };
 
-    FileTreeViewModel.prototype.moveFile = function(oldPath, newPath) {
-      var treeData = this._treeData;
-      var objectPath1 = _filePathToObjectPath(treeData, oldPath);
-      var objectPath2 = _filePathToObjectPath(treeData, FileUtils.getDirectoryPath(newPath));
-      var originalName = _.last(objectPath1),
-      currentObject = treeData.getIn(objectPath1);
+    FileTreeViewModel.prototype.moveItem = function(oldPath, newPath) {
+        var treeData = this._treeData;
+        var objectPath1 = _filePathToObjectPath(treeData, oldPath);
+        var objectPath2 = _filePathToObjectPath(treeData, FileUtils.getDirectoryPath(newPath));
+        var originalName = _.last(objectPath1),
+        currentObject = treeData.getIn(objectPath1);
 
-      // Back up to the parent directory
-      objectPath1.pop();
+        // Back up to the parent directory
+        objectPath1.pop();
 
-      treeData = treeData.updateIn(objectPath1, function (directory) {
-        directory = directory.delete(originalName);
-        return directory;
-      });
+        treeData = treeData.updateIn(objectPath1, function (directory) {
+            directory = directory.delete(originalName);
+            return directory;
+        });
 
-      if (treeData.getIn(objectPath2).get("open")) {
-        objectPath2.push("children");
-        objectPath2.push(originalName);
-        if (_.last(oldPath) !== "/") // check if file
-          treeData = _setIn(treeData, objectPath2, Immutable.Map());
-        else
-          treeData = _setIn(treeData, objectPath2, Immutable.Map({children: null}));
-      }
+        if (treeData.getIn(objectPath2).get("open")) {
+            objectPath2.push("children");
+            objectPath2.push(originalName);
+            if (_.last(oldPath) !== "/") { // check if file
+                treeData = _setIn(treeData, objectPath2, Immutable.Map());
+            }
+            else {
+                treeData = _setIn(treeData, objectPath2, Immutable.Map({children: null}));
+            }
+        }
 
-      console.log(JSON.stringify(treeData, null, 2));
-
-      this._commit(treeData);
+        this._commit(treeData);
     };
 
     /**
