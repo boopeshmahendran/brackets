@@ -903,6 +903,10 @@ define(function (require, exports, module) {
      */
     function _renameItem(oldPath, newPath, newName, isFolder) {
         var result = new $.Deferred();
+        console.log(oldPath);
+        console.log(newPath);
+        console.log(newName);
+        console.log(isFolder);
 
         if (oldPath === newPath) {
             result.resolve();
@@ -1256,7 +1260,7 @@ define(function (require, exports, module) {
         }
 
         // Reusing the _renameItem for moving item
-        this._renameItem(oldPath, fullNewPath, fileName).then(function () {
+        this._renameItem(oldPath, fullNewPath, fileName, !_pathIsFile(fullNewPath)).then(function () {
             self._viewModel.moveItem(self.makeProjectRelativeIfPossible(oldPath), self.makeProjectRelativeIfPossible(fullNewPath));
             d.resolve();
         }).fail(function (errorType) {

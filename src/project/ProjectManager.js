@@ -376,6 +376,7 @@ define(function (require, exports, module) {
      */
     ActionCreator.prototype.moveItem = function(oldPath, newPath) {
         var self = this;
+        
         this.model.moveItem(oldPath, newPath)
         .done(function() {
             // Remove selected marker if selected item is moved
@@ -384,6 +385,7 @@ define(function (require, exports, module) {
             }
         }).fail(function(errorInfo) {
             window.setTimeout(function () {
+                console.log(errorInfo.type);
                 switch (errorInfo.type) {
                     //case FileSystemError.ALREADY_EXISTS:
                     default:
