@@ -490,23 +490,24 @@ define(function (require, exports, module) {
     };
 
     FileTreeViewModel.prototype.moveItem = function(oldPath, newPath) {
-        var treeData = this._treeData;
-        var objectPath1 = _filePathToObjectPath(treeData, oldPath);
-        var objectPath2 = _filePathToObjectPath(treeData, FileUtils.getDirectoryPath(newPath));
-        var originalName = _.last(objectPath1),
-        currentObject = treeData.getIn(objectPath1);
+        var treeData = this._treeData,
+            objectPath1 = _filePathToObjectPath(treeData, oldPath),
+            objectPath2 = _filePathToObjectPath(treeData, FileUtils.getParentPath(newPath)),
+            itemName = _.last(objectPath1);
 
         // Back up to the parent directory
         objectPath1.pop();
 
+        // Remove the oldPath
         treeData = treeData.updateIn(objectPath1, function (directory) {
-            directory = directory.delete(originalName);
+            directory = directory.delete(itemName);
             return directory;
         });
 
+        // Add the newPath
         if (treeData.getIn(objectPath2).get("open")) {
             objectPath2.push("children");
-            objectPath2.push(originalName);
+            objectPath2.push(itemName);
             if (_.last(oldPath) !== "/") { // check if file
                 treeData = _setIn(treeData, objectPath2, Immutable.Map());
             }

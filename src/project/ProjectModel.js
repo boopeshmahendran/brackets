@@ -1239,26 +1239,31 @@ define(function (require, exports, module) {
         this._viewModel.closeSubtree(this.makeProjectRelativeIfPossible(path));
     };
 
+    /**
+     * Moves the item in oldPath to the newPath directory
+     * @param {string}  oldPath  old path of the item
+     * @param {string} newPath new path of the directory to move the item
+     * @return {$.Promise} promise resolved when the item is moved
+     */
     ProjectModel.prototype.moveItem = function(oldPath, newPath) {
-        var d = new $.Deferred();
+        var self = this,
+            d = new $.Deferred(),
+            fileName = FileUtils.getBaseName(oldPath),
+            fullNewPath = newPath + fileName;
 
-        //  delete this._selections.rename;
-        //  delete this._selections.context;
-        //
-        //  this._viewModel.moveMarker("rename", oldPath, null);
-        //  this._viewModel.moveMarker("context", oldPath, null);
-        //  this._viewModel.moveMarker("creating", oldPath, null);
+        if (!_pathIsFile(oldPath)) {
+            fullNewPath = _ensureTrailingSlash(fullNewPath);
+        }
 
-        var self = this;
-        var fileName = FileUtils.getBaseName(newPath);
-        this._renameItem(oldPath, newPath, fileName).then(function () {
-            self._viewModel.moveItem(self.makeProjectRelativeIfPossible(oldPath), self.makeProjectRelativeIfPossible(newPath));
+        // Reusing the _renameItem for moving item
+        this._renameItem(oldPath, fullNewPath, fileName).then(function () {
+            self._viewModel.moveItem(self.makeProjectRelativeIfPossible(oldPath), self.makeProjectRelativeIfPossible(fullNewPath));
             d.resolve();
         }).fail(function (errorType) {
             var errorInfo = {
                 type: errorType,
-                isFolder: !_pathIsFile(newPath),
-                fullPath: newPath
+                isFolder: !_pathIsFile(fullNewPath),
+                fullPath: fullNewPath
             };
             d.reject(errorInfo);
         });

@@ -161,10 +161,6 @@ define(function (require, exports, module) {
             }
         },
 
-        handleMouseDown: function(e) {
-            e.preventDefault();
-        },
-
         /**
          * If the user presses enter or escape, we either successfully complete or cancel, respectively,
          * the rename or create operation that is underway.
@@ -205,7 +201,8 @@ define(function (require, exports, module) {
      * This is a mixin that provides drag and drop move function.
      */
      var dragAndDrop = {
-         drag: function(e) {
+         handleDrag: function(e) {
+             // Pass the dragged item path.
              e.dataTransfer.setData("text", JSON.stringify({
                  path: this.myPath()
              }));
@@ -218,18 +215,22 @@ define(function (require, exports, module) {
 
              e.stopPropagation();
          },
-         drop: function(e) {
+         handleDrop: function(e) {
              var data = JSON.parse(e.dataTransfer.getData("text"));
-             var fileName = FileUtils.getBaseName(data.path);
-             this.props.actions.moveItem(data.path, this.myPath() + fileName);
+
+             this.props.actions.moveItem(data.path, this.myPath());
+
              e.stopPropagation();
          },
 
-         allowDrop: function(e) {
+         /**
+          * Allow the drop
+          */
+         handleDragOver: function(e) {
              e.preventDefault();
          },
 
-         dragLeave: function(e) {
+         handleDragLeave: function(e) {
          }
      };
 
@@ -270,7 +271,6 @@ define(function (require, exports, module) {
                 onKeyDown: this.handleKeyDown,
                 onInput: this.handleInput,
                 onClick: this.handleClick,
-                onMouseDown: this.handleMouseDown,
                 onBlur: this.handleBlur,
                 style: {
                     width: width
@@ -540,7 +540,7 @@ define(function (require, exports, module) {
                     onMouseDown: this.handleMouseDown,
                     onDoubleClick: this.handleDoubleClick,
                     draggable: true,
-                    onDragStart: this.drag
+                    onDragStart: this.handleDrag
                 },
                 DOM.ins({
                     className: "jstree-icon"
@@ -785,7 +785,7 @@ define(function (require, exports, module) {
                     onClick: this.handleClick,
                     onMouseDown: this.handleMouseDown,
                     draggable: true,
-                    onDragStart: this.drag
+                    onDragStart: this.handleDrag
                 },
                 _createAlignedIns(this.props.depth)
             ];
@@ -805,9 +805,9 @@ define(function (require, exports, module) {
                 var aArgs = _.flatten([{
                     href: "#",
                     className: directoryClasses,
-                    onDrop: this.drop,
-                    onDragOver: this.allowDrop,
-                    onDragLeave: this.dragLeave
+                    onDrop: this.handleDrop,
+                    onDragOver: this.handleDragOver,
+                    onDragLeave: this.handleDragLeave
                 }, thickness, this.getIcons(), this.props.name]);
                 nameDisplay = DOM.a.apply(DOM.a, aArgs);
             }

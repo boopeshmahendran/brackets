@@ -369,10 +369,19 @@ define(function (require, exports, module) {
         _saveTreeState();
     };
 
+    /**
+     * Moves the item in the oldPath to the newPath directory
+     *
+     * See `ProjectModel.moveItem`
+     */
     ActionCreator.prototype.moveItem = function(oldPath, newPath) {
+        var self = this;
         this.model.moveItem(oldPath, newPath)
         .done(function() {
-
+            // Remove selected marker if selected item is moved
+            if (self.model.getSelected() && self.model.getSelected().fullPath === oldPath && oldPath !== newPath) {
+                self.setSelected(null);
+            }
         }).fail(function(errorInfo) {
             window.setTimeout(function () {
                 switch (errorInfo.type) {
@@ -613,7 +622,7 @@ define(function (require, exports, module) {
             message = StringUtils.format(Strings.INVALID_FILENAME_MESSAGE, isFolder ? Strings.DIRECTORY_NAMES_LEDE : Strings.FILENAMES_LEDE, error);
             break;
         case ERR_TYPE_MOVE_EXISTS:
-            title = StringUtils.format(Strings.INVALID_FILENAME_TITLE, titleType);
+            title = StringUtils.format(Strings.INVALID_FILENAME_TITLE, isFolder ? Strings.DIRECTORY_NAME : Strings.FILENAME);
             message = StringUtils.format(Strings.ENTRY_WITH_SAME_NAME_EXISTS, path);
             break;
         }
@@ -1230,16 +1239,6 @@ define(function (require, exports, module) {
 
         $projectTreeContainer.on("scroll", function () {
             // Close open menus on scroll and clear the context, but only if there's a menu open.
-            if ($(".dropdown.open").length > 0) {
-                Menus.closeAll();
-                actionCreator.setContext(null);
-            }
-            // we need to render the tree without a delay to not cause selection extension issues (#10573)
-            _renderTreeSync();
-        });
-
-        $(".jstree-leaf").on("dragstart", function () {
-            // Close open menus on dragStart and clear the context, but only if there's a menu open.
             if ($(".dropdown.open").length > 0) {
                 Menus.closeAll();
                 actionCreator.setContext(null);
