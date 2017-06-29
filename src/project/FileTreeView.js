@@ -218,9 +218,6 @@ define(function (require, exports, module) {
          handleDrop: function(e) {
              var data = JSON.parse(e.dataTransfer.getData("text"));
 
-             console.log(data.path);
-             console.log(this.myPath());
-
              this.props.actions.moveItem(data.path, this.myPath());
 
              e.stopPropagation();

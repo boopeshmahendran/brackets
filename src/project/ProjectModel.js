@@ -903,10 +903,6 @@ define(function (require, exports, module) {
      */
     function _renameItem(oldPath, newPath, newName, isFolder) {
         var result = new $.Deferred();
-        console.log(oldPath);
-        console.log(newPath);
-        console.log(newName);
-        console.log(isFolder);
 
         if (oldPath === newPath) {
             result.resolve();
