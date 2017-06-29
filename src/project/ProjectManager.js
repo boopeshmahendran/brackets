@@ -116,7 +116,8 @@ define(function (require, exports, module) {
         ERR_TYPE_LOADING_PROJECT_NATIVE = 6,
         ERR_TYPE_MAX_FILES              = 7,
         ERR_TYPE_OPEN_DIALOG            = 8,
-        ERR_TYPE_INVALID_FILENAME       = 9;
+        ERR_TYPE_INVALID_FILENAME       = 9,
+        ERR_TYPE_MOVE                   = 10;
 
     /**
      * @private
@@ -369,6 +370,35 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Moves the item in the oldPath to the newDirectory directory
+     *
+     * See `ProjectModel.moveItem`
+     */
+    ActionCreator.prototype.moveItem = function(oldPath, newDirectory) {
+        var self = this;
+
+        this.model.moveItem(oldPath, newDirectory)
+        .done(function() {
+            // Remove selected marker if selected item is moved
+            if (self.model.getSelected() && self.model.getSelected().fullPath === oldPath && FileUtils.getParentPath(oldPath) !== newDirectory) {
+                self.setSelected(null);
+            }
+        }).fail(function(errorInfo) {
+            // Need to do display the error message on the next event loop turn
+            // because some errors can come up synchronously and then the dialog
+            // is not displayed.
+            window.setTimeout(function () {
+                switch (errorInfo.type) {
+                    // TODO: handle Errors
+                    default:
+                    _showErrorDialog(ERR_TYPE_MOVE, errorInfo.isFolder, Strings.FILE_EXISTS_ERR, errorInfo.fullPath);
+                    break;
+                }
+            }, 10);
+        });
+    };
+
+    /**
      * See `ProjectModel.refresh`
      */
     ActionCreator.prototype.refresh = function () {
@@ -594,6 +624,11 @@ define(function (require, exports, module) {
         case ERR_TYPE_INVALID_FILENAME:
             title = StringUtils.format(Strings.INVALID_FILENAME_TITLE, isFolder ? Strings.DIRECTORY_NAME : Strings.FILENAME);
             message = StringUtils.format(Strings.INVALID_FILENAME_MESSAGE, isFolder ? Strings.DIRECTORY_NAMES_LEDE : Strings.FILENAMES_LEDE, error);
+            break;
+        case ERR_TYPE_MOVE:
+            // TODO: Change it to handle move errors
+            title = StringUtils.format(Strings.GENERIC_ERROR, titleType);
+            message = StringUtils.format(Strings.GENERIC_ERROR, path);
             break;
         }
 

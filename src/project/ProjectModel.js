@@ -1240,6 +1240,39 @@ define(function (require, exports, module) {
     };
 
     /**
+     * Moves the item in oldPath to the newDirectory directory
+     * @param {string} oldPath  old path of the item
+     * @param {string} newDirectory path of the directory to move the item
+     * @return {$.Promise} promise resolved when the item is moved
+     */
+    ProjectModel.prototype.moveItem = function(oldPath, newDirectory) {
+        var self = this,
+            d = new $.Deferred(),
+            fileName = FileUtils.getBaseName(oldPath),
+            fullNewPath = newDirectory + fileName;
+
+        // Add trailing slash if directory is moved
+        if (!_pathIsFile(oldPath)) {
+            fullNewPath = _ensureTrailingSlash(fullNewPath);
+        }
+
+        // Reusing the _renameItem for moving item
+        this._renameItem(oldPath, fullNewPath, fileName, !_pathIsFile(fullNewPath)).then(function () {
+            self._viewModel.moveItem(self.makeProjectRelativeIfPossible(oldPath), self.makeProjectRelativeIfPossible(fullNewPath));
+            d.resolve();
+        }).fail(function (errorType) {
+            var errorInfo = {
+                type: errorType,
+                isFolder: !_pathIsFile(fullNewPath),
+                fullPath: fullNewPath
+            };
+            d.reject(errorInfo);
+        });
+
+        return d.promise();
+    };
+
+    /**
      * Toggle the open state of subdirectories.
      * @param {!string}  path        parent directory
      * @param {boolean} openOrClose  true to open directory, false to close
