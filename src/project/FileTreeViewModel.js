@@ -489,6 +489,12 @@ define(function (require, exports, module) {
         this._commit(treeData);
     };
 
+    /**
+     * Removes the item from the oldPath and adds the item in the newPath
+     *
+     * @param {string} oldPath old path of the item
+     * @param {string} newPath new path of the item
+     */
     FileTreeViewModel.prototype.moveItem = function(oldPath, newPath) {
         var treeData = this._treeData,
             objectPath1 = _filePathToObjectPath(treeData, oldPath),

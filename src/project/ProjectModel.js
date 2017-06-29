@@ -1240,16 +1240,16 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Moves the item in oldPath to the newPath directory
+     * Moves the item in oldPath to the newDirectory directory
      * @param {string}  oldPath  old path of the item
-     * @param {string} newPath new path of the directory to move the item
+     * @param {string} newDirectory new path of the directory to move the item
      * @return {$.Promise} promise resolved when the item is moved
      */
-    ProjectModel.prototype.moveItem = function(oldPath, newPath) {
+    ProjectModel.prototype.moveItem = function(oldPath, newDirectory) {
         var self = this,
             d = new $.Deferred(),
             fileName = FileUtils.getBaseName(oldPath),
-            fullNewPath = newPath + fileName;
+            fullNewPath = newDirectory + fileName;
 
         if (!_pathIsFile(oldPath)) {
             fullNewPath = _ensureTrailingSlash(fullNewPath);

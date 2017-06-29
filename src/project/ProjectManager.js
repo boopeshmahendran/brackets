@@ -370,17 +370,17 @@ define(function (require, exports, module) {
     };
 
     /**
-     * Moves the item in the oldPath to the newPath directory
+     * Moves the item in the oldPath to the newDirectory directory
      *
      * See `ProjectModel.moveItem`
      */
-    ActionCreator.prototype.moveItem = function(oldPath, newPath) {
+    ActionCreator.prototype.moveItem = function(oldPath, newDirectory) {
         var self = this;
 
-        this.model.moveItem(oldPath, newPath)
+        this.model.moveItem(oldPath, newDirectory)
         .done(function() {
             // Remove selected marker if selected item is moved
-            if (self.model.getSelected() && self.model.getSelected().fullPath === oldPath && oldPath !== newPath) {
+            if (self.model.getSelected() && self.model.getSelected().fullPath === oldPath && oldPath !== newDirectory) {
                 self.setSelected(null);
             }
         }).fail(function(errorInfo) {
