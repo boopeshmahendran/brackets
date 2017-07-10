@@ -34,6 +34,7 @@ define(function (require, exports, module) {
     var Preact            = require("thirdparty/preact"),
         Classnames        = require("thirdparty/classnames"),
         Immutable         = require("thirdparty/immutable"),
+        Menus             = require("command/Menus"),
         _                 = require("thirdparty/lodash"),
         FileUtils         = require("file/FileUtils"),
         LanguageManager   = require("language/LanguageManager"),
@@ -196,6 +197,46 @@ define(function (require, exports, module) {
     };
 
     /**
+     * This is a mixin that provides drag and drop move function.
+     */
+     var dragAndDrop = {
+         handleDrag: function(e) {
+             // Pass the dragged item path.
+             e.dataTransfer.setData("text", JSON.stringify({
+                 path: this.myPath()
+             }));
+
+             // Close open menus on drag and clear the context, but only if there's a menu open.
+             if ($(".dropdown.open").length > 0) {
+                 Menus.closeAll();
+                 this.props.actions.setContext(null);
+             }
+
+             e.stopPropagation();
+         },
+         handleDrop: function(e) {
+             var data = JSON.parse(e.dataTransfer.getData("text"));
+
+             this.props.actions.moveItem(data.path, this.myPath());
+             this.props.actions.setDraggedOver(null);
+
+             e.stopPropagation();
+         },
+
+         /**
+          * Allow the drop
+          */
+         handleDragOver: function(e) {
+             this.props.actions.setDraggedOver(this.myPath());
+             e.preventDefault();
+         },
+
+         handleDragLeave: function(e) {
+             this.props.actions.setDraggedOver(null);
+         }
+     };
+
+    /**
      * @private
      *
      * This component presents an input field to the user for renaming a file.
@@ -263,9 +304,9 @@ define(function (require, exports, module) {
             }
             // Return true only for mouse down in rename mode.
             if (this.props.entry.get("rename")) {
+                e.preventDefault(); // Disable drag and drop when renaming
                 return;
             }
-            e.preventDefault();
         }
     };
 
@@ -363,7 +404,7 @@ define(function (require, exports, module) {
      * * forceRender: causes the component to run render
      */
     var fileNode = Preact.createFactory(Preact.createClass({
-        mixins: [contextSettable, pathComputer, extendable],
+        mixins: [contextSettable, pathComputer, extendable, dragAndDrop],
 
         /**
          * Ensures that we always have a state object.
@@ -504,7 +545,9 @@ define(function (require, exports, module) {
                     className: this.getClasses("jstree-leaf"),
                     onClick: this.handleClick,
                     onMouseDown: this.handleMouseDown,
-                    onDoubleClick: this.handleDoubleClick
+                    onDoubleClick: this.handleDoubleClick,
+                    draggable: true,
+                    onDragStart: this.handleDrag
                 },
                 DOM.ins({
                     className: "jstree-icon"
@@ -645,7 +688,7 @@ define(function (require, exports, module) {
      * * forceRender: causes the component to run render
      */
     directoryNode = Preact.createFactory(Preact.createClass({
-        mixins: [contextSettable, pathComputer, extendable],
+        mixins: [contextSettable, pathComputer, extendable, dragAndDrop],
 
         /**
          * We need to update this component if the sort order changes or our entry object
@@ -741,14 +784,17 @@ define(function (require, exports, module) {
 
             var directoryClasses = cx({
                 'jstree-clicked sidebar-selection': entry.get("selected"),
-                'context-node': entry.get("context")
+                'context-node': entry.get("context"),
+                'jstree-draggedOver': entry.get("draggedOver")
             });
 
             var liArgs = [
                 {
                     className: this.getClasses("jstree-" + nodeClass),
                     onClick: this.handleClick,
-                    onMouseDown: this.handleMouseDown
+                    onMouseDown: this.handleMouseDown,
+                    draggable: true,
+                    onDragStart: this.handleDrag
                 },
                 _createAlignedIns(this.props.depth)
             ];
@@ -772,7 +818,10 @@ define(function (require, exports, module) {
                 // Need to flatten the arguments because getIcons returns an array
                 var aArgs = _.flatten([{
                     href: "#",
-                    className: directoryClasses
+                    className: directoryClasses,
+                    onDrop: this.handleDrop,
+                    onDragOver: this.handleDragOver,
+                    onDragLeave: this.handleDragLeave
                 }, thickness, this.getIcons(), name]);
                 nameDisplay = DOM.a.apply(DOM.a, aArgs);
             }
