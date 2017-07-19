@@ -229,6 +229,7 @@ define(function (require, exports, module) {
          handleDragOver: function(e) {
              this.props.actions.setDraggedOver(this.myPath());
              e.preventDefault();
+             e.stopPropagation();
          },
 
          handleDragLeave: function(e) {
@@ -547,11 +548,7 @@ define(function (require, exports, module) {
                     onMouseDown: this.handleMouseDown,
                     onDoubleClick: this.handleDoubleClick,
                     draggable: true,
-                    onDragStart: this.handleDrag,
-                    onDrop: function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
+                    onDragStart: this.handleDrag
                 },
                 DOM.ins({
                     className: "jstree-icon"
@@ -788,17 +785,24 @@ define(function (require, exports, module) {
 
             var directoryClasses = cx({
                 'jstree-clicked sidebar-selection': entry.get("selected"),
-                'context-node': entry.get("context"),
-                'jstree-draggedOver': entry.get("draggedOver")
+                'context-node': entry.get("context")
             });
+
+            var nodeClasses = "jstree-" + nodeClass;
+            if (entry.get("draggedOver")) {
+                nodeClasses += " jstree-draggedOver";
+            }
 
             var liArgs = [
                 {
-                    className: this.getClasses("jstree-" + nodeClass),
+                    className: this.getClasses(nodeClasses),
                     onClick: this.handleClick,
                     onMouseDown: this.handleMouseDown,
                     draggable: true,
-                    onDragStart: this.handleDrag
+                    onDragStart: this.handleDrag,
+                    onDrop: this.handleDrop,
+                    onDragOver: this.handleDragOver,
+                    onDragLeave: this.handleDragLeave
                 },
                 _createAlignedIns(this.props.depth)
             ];
