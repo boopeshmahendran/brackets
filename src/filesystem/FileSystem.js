@@ -738,6 +738,8 @@ define(function (require, exports, module) {
             var removedEntries = oldContents && oldContents.filter(function (entry) {
                 return contents.indexOf(entry) === -1;
             });
+            console.log(addedEntries);
+            console.log(removedEntries);
 
             // If directory is not watched, clear children's caches manually.
             var watchedRoot = this._findWatchedRootForPath(directory.fullPath);

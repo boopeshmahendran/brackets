@@ -29,6 +29,7 @@
 define(function (require, exports, module) {
     "use strict";
 
+    var FileUtils = require("file/FileUtils");
     /**
      * @constructor
      */
@@ -137,6 +138,22 @@ define(function (require, exports, module) {
                 this._index[renameMap[path]] = item;
                 item._setPath(renameMap[path]);
             }
+        }
+
+        var x = this._index[FileUtils.getParentPath(oldPath)];
+        var z;
+        if (x && x._contents) {
+            x._contents.forEach(function(entry, index) {
+                if (entry._path === oldPath || entry._path === newPath) {
+                    z = x._contents.splice(index, 1);
+                }
+            });
+        }
+
+        var y = this._index[FileUtils.getParentPath(newPath)];
+        if (y && y._contents) {
+            z[0]._path = newPath;
+            y._contents.push(z[0]);
         }
     };
 

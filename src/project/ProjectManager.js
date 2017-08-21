@@ -295,13 +295,6 @@ define(function (require, exports, module) {
     };
 
     /**
-     * See `ProjectModel.setDraggedOver`
-     */
-    ActionCreator.prototype.setDraggedOver = function (path) {
-        this.model.setDraggedOver(path);
-    };
-
-    /**
      * See `ProjectModel.startRename`
      */
     ActionCreator.prototype.startRename = function (path) {
@@ -434,7 +427,7 @@ define(function (require, exports, module) {
      * Singleton actionCreator that is used for dispatching changes to the ProjectModel.
      */
     var actionCreator = new ActionCreator(model);
-    
+
     /**
      * Returns the File or Directory corresponding to the item that was right-clicked on in the file tree menu.
      * @return {?(File|Directory)}
