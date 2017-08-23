@@ -719,7 +719,7 @@ define(function (require, exports, module) {
 
         getInitialState: function () {
             return {
-                draggedOver: false,
+                draggedOver: false
             };
         },
         /**
