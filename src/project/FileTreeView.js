@@ -207,6 +207,7 @@ define(function (require, exports, module) {
 
              this.props.actions.dragItem(this.myPath());
 
+             this.setDragImage(e);
              e.stopPropagation();
          },
          handleDrop: function(e) {
@@ -259,6 +260,15 @@ define(function (require, exports, module) {
                      draggedOver: draggedOver
                  });
              }
+         },
+         setDragImage: function(e) {
+             var div = document.createElement('div');
+             div.style.position = 'absolute';
+             div.style.color = '#fff';
+             div.textContent = this.props.name;
+             document.body.appendChild(div);
+             e.dataTransfer.setDragImage(div, -10, -10);
+             setTimeout(() => document.body.removeChild(div), 0);
          }
 
      };
