@@ -227,9 +227,6 @@ define(function (require, exports, module) {
              this.clearDragTimeout();
          },
 
-         /**
-          * Allow the drop
-          */
          handleDragOver: function(e) {
              var self = this;
              this.setDraggedOver(true);
@@ -241,7 +238,8 @@ define(function (require, exports, module) {
                      self.dragOverTimeout = null;
                  }, 800);
              }
-             e.preventDefault();
+
+             e.preventDefault(); // Allow the drop
              e.stopPropagation();
          },
 
