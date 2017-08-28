@@ -1279,14 +1279,14 @@ define(function (require, exports, module) {
 
         $projectTreeContainer.on("dragover", function(e) {
             e.preventDefault();
-        })
+        });
 
         // Add support for moving items to root directory
         $projectTreeContainer.on("drop", function(e) {
             var data = JSON.parse(e.originalEvent.dataTransfer.getData("text"));
             actionCreator.moveItem(data.path, getProjectRoot().fullPath);
             e.stopPropagation();
-        })
+        });
 
         // When a context menu item is selected, we need to clear the context
         // because we don't get a beforeContextMenuClose event since Bootstrap

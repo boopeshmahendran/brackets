@@ -269,13 +269,15 @@ define(function (require, exports, module) {
              }
          },
          setDragImage: function(e) {
-             var div = document.createElement('div');
+             var div = window.document.createElement('div');
              div.style.position = 'absolute';
              div.style.color = '#fff';
              div.textContent = this.props.name;
-             document.body.appendChild(div);
+             window.document.body.appendChild(div);
              e.dataTransfer.setDragImage(div, -10, -10);
-             setTimeout(() => document.body.removeChild(div), 0);
+             window.setTimeout(function() {
+                 window.document.body.removeChild(div);
+             }, 0);
          }
 
      };
