@@ -276,7 +276,7 @@ define(function (require, exports, module) {
              div.textContent = this.props.name;
              window.document.body.appendChild(div);
              e.dataTransfer.setDragImage(div, -10, -10);
-             setTimeout(function() {
+             window.setTimeout(function() {
                  window.document.body.removeChild(div);
              }, 0);
          }
@@ -882,7 +882,10 @@ define(function (require, exports, module) {
                 // Need to flatten the arguments because getIcons returns an array
                 var aArgs = _.flatten([{
                     href: "#",
-                    className: directoryClasses
+                    className: directoryClasses,
+                    onDrop: this.handleDrop,
+                    onDragOver: this.handleDragOver,
+                    onDragLeave: this.handleDragLeave
                 }, thickness, this.getIcons(), name]);
                 nameDisplay = DOM.a.apply(DOM.a, aArgs);
             }
@@ -1111,19 +1114,6 @@ define(function (require, exports, module) {
                 this.props.selectionViewInfo !== nextProps.selectionViewInfo;
         },
 
-        handleDrop: function(e) {
-            var data = JSON.parse(e.dataTransfer.getData("text"));
-            this.props.actions.moveItem(data.path, this.props.parentPath);
-            e.stopPropagation();
-        },
-
-        /**
-        * Allow the drop
-        */
-        handleDragOver: function(e) {
-            e.preventDefault();
-        },
-
         render: function () {
             var selectionBackground = fileSelectionBox({
                 ref: "selectionBackground",
@@ -1165,19 +1155,10 @@ define(function (require, exports, module) {
                     actions: this.props.actions,
                     forceRender: this.props.forceRender,
                     platform: this.props.platform
-                }),
-                args = {
-                    onDrop: this.handleDrop,
-                    onDragOver: this.handleDragOver,
-                    style: {
-                        height: '100%',
-                        width: '100%',
-                        overflowY: 'auto'
-                    }
-                };
+                });
 
             return DOM.div(
-                args,
+                null,
                 contents,
                 selectionBackground,
                 contextBackground,

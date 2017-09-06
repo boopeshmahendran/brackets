@@ -1254,10 +1254,6 @@ define(function (require, exports, module) {
         $projectTreeContainer.css("position", "relative");
 
         fileTreeViewContainer = $("<div>").appendTo($projectTreeContainer)[0];
-        fileTreeViewContainer.style.position = "absolute";
-        fileTreeViewContainer.style.height = "100%";
-        fileTreeViewContainer.style.width = "100%";
-        fileTreeViewContainer.style.overflowY = "auto";
 
         model.setSelectionWidth($projectTreeContainer.width());
 
@@ -1282,6 +1278,17 @@ define(function (require, exports, module) {
 
         $projectTreeContainer.on("contextmenu", function () {
             forceFinishRename();
+        });
+
+        $projectTreeContainer.on("dragover", function(e) {
+            e.preventDefault();
+        });
+
+        // Add support for moving items to root directory
+        $projectTreeContainer.on("drop", function(e) {
+            var data = JSON.parse(e.originalEvent.dataTransfer.getData("text"));
+            actionCreator.moveItem(data.path, getProjectRoot().fullPath);
+            e.stopPropagation();
         });
 
         // When a context menu item is selected, we need to clear the context
